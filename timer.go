@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"time"
+	"timer/save"
 
 	"github.com/Matts-vdp/terminal/ter"
 )
@@ -12,9 +13,8 @@ func main() {
 	l := make([]string, 2)
 	term := ter.InitTerminal(os.Stdout, l, true)
 	defer term.Close()
-	term.UpdateLine(0, "Start")
-	term.UpdateLine(1, "time passed")
 	now := time.Now()
+	var pas time.Duration
 	for {
 		pas := time.Since(now)
 		term.UpdateLine(0, now.Format("15:04:05"))
@@ -24,5 +24,7 @@ func main() {
 		s := fmt.Sprintf("%.2d:%.2d:%.2d", hr, mn, sc)
 		term.UpdateLine(1, s)
 		<-time.After(time.Second / 5)
+
 	}
+	save.Save(now, pas)
 }
