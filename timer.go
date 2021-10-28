@@ -9,22 +9,40 @@ import (
 	"github.com/Matts-vdp/terminal/ter"
 )
 
-func main() {
-	l := make([]string, 2)
-	term := ter.InitTerminal(os.Stdout, l, true)
-	defer term.Close()
-	now := time.Now()
-	var pas time.Duration
-	for {
-		pas := time.Since(now)
-		term.UpdateLine(0, now.Format("15:04:05"))
-		hr := int(pas.Hours())
-		mn := int(pas.Minutes()) - int(pas.Hours())*60
-		sc := int(pas.Seconds()) - int(pas.Minutes())*60
-		s := fmt.Sprintf("%.2d:%.2d:%.2d", hr, mn, sc)
-		term.UpdateLine(1, s)
-		<-time.After(time.Second / 5)
+func waitRead() chan bool {
+	ch := make(chan bool)
+	go func() {
+		var str string
+		fmt.Scanln(&str)
+		ch <- true
+	}()
+	return ch
+}
 
+func updateTime(term *ter.TerminalOut, now time.Time) {
+	pas := time.Since(now)
+	term.UpdateLine(0, now.Format("15:04:05"))
+	s := save.Print(pas)
+	term.UpdateLine(1, s)
+}
+
+func mainloop(now time.Time) {
+
+	term := ter.InitTerminal(os.Stdout, make([]string, 2), true)
+	defer term.Close()
+	ch := waitRead()
+	for {
+		select {
+		case <-ch:
+			return
+		case <-time.After(time.Second / 5):
+			updateTime(term, now)
+		}
 	}
-	save.Save(now, pas)
+}
+
+func main() {
+	now := time.Now()
+	mainloop(now)
+	save.Save(now)
 }
