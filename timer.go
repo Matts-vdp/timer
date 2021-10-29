@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"time"
@@ -26,6 +27,12 @@ func updateTime(term *ter.TerminalOut, now time.Time) {
 	term.UpdateLine(1, s)
 }
 
+func GetTimes() string {
+	sav := save.Load()
+	str := sav.String()
+	return str
+}
+
 func mainloop(now time.Time) {
 
 	term := ter.InitTerminal(os.Stdout, make([]string, 2), true)
@@ -42,6 +49,12 @@ func mainloop(now time.Time) {
 }
 
 func main() {
+	lg := flag.Bool("l", false, "give logging info")
+	flag.Parse()
+	if *lg {
+		fmt.Println(GetTimes())
+		return
+	}
 	now := time.Now()
 	mainloop(now)
 	save.Save(now)

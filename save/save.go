@@ -13,8 +13,23 @@ type saveform struct {
 	Start    time.Time
 	Duration string
 }
+
+func (sav saveform) String() string {
+	str := sav.Start.Format("02/01/2006 15:04")
+	str += " : " + sav.Duration + "\n"
+	return str
+}
+
 type saveStore struct {
 	Saves []saveform
+}
+
+func (sav saveStore) String() string {
+	var str string
+	for _, s := range sav.Saves {
+		str += s.String()
+	}
+	return str
 }
 
 func Print(t time.Duration) string {
@@ -24,8 +39,8 @@ func Print(t time.Duration) string {
 	return fmt.Sprintf("%.2d:%.2d:%.2d", hr, mn, sc)
 }
 
-func load() saveStore {
-	f, err := ioutil.ReadFile("C:/Users/Gebruiker/Desktop/python/Go/timer")
+func Load() saveStore {
+	f, err := ioutil.ReadFile("C:/Users/Gebruiker/Desktop/python/Go/timer/save.json")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -36,11 +51,11 @@ func load() saveStore {
 
 func Save(start time.Time) {
 	sf := saveform{start, Print(time.Since(start))}
-	s := load()
+	s := Load()
 	s.Saves = append(s.Saves, sf)
 	js, err := json.MarshalIndent(s, "", "    ")
 	if err != nil {
 		log.Fatal(err)
 	}
-	os.WriteFile("C:/Users/Gebruiker/Desktop/python/Go/timer", js, 0644)
+	os.WriteFile("C:/Users/Gebruiker/Desktop/python/Go/timer/save.json", js, 0644)
 }
