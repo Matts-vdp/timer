@@ -12,11 +12,13 @@ import (
 type saveform struct {
 	Start    time.Time
 	Duration string
+	Info     string
 }
 
 func (sav saveform) String() string {
 	str := sav.Start.Format("02/01/2006 15:04")
-	str += " : " + sav.Duration + "\n"
+	str += " : " + sav.Duration
+	str += " : " + sav.Info + "\n"
 	return str
 }
 
@@ -49,8 +51,8 @@ func Load() saveStore {
 	return s
 }
 
-func Save(start time.Time) {
-	sf := saveform{start, Print(time.Since(start))}
+func Save(start time.Time, info string) {
+	sf := saveform{start, Print(time.Since(start)), info}
 	s := Load()
 	s.Saves = append(s.Saves, sf)
 	js, err := json.MarshalIndent(s, "", "    ")

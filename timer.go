@@ -51,11 +51,12 @@ func mainloop(now time.Time) {
 func main() {
 	lg := flag.Bool("l", false, "give logging info")
 	flag.Parse()
+	info := flag.Arg(0)
 	if *lg {
 		fmt.Println(GetTimes())
 		return
 	}
 	now := time.Now()
 	mainloop(now)
-	save.Save(now)
+	save.Save(now, info)
 }
