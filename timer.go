@@ -10,12 +10,12 @@ import (
 	"github.com/Matts-vdp/terminal/ter"
 )
 
-func waitRead() chan bool {
-	ch := make(chan bool)
+func waitRead() chan string {
+	ch := make(chan string)
 	go func() {
 		var str string
 		fmt.Scanln(&str)
-		ch <- true
+		ch <- str
 	}()
 	return ch
 }
@@ -51,12 +51,13 @@ func mainloop(now time.Time) {
 func main() {
 	lg := flag.Bool("l", false, "give logging info")
 	flag.Parse()
-	info := flag.Arg(0)
 	if *lg {
 		fmt.Println(GetTimes())
 		return
 	}
 	now := time.Now()
 	mainloop(now)
+	info := <-waitRead()
 	save.Save(now, info)
+
 }
