@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 	"timer/save"
 
@@ -13,8 +15,9 @@ import (
 func waitRead() chan string {
 	ch := make(chan string)
 	go func() {
-		var str string
-		fmt.Scanln(&str)
+		reader := bufio.NewReader(os.Stdin)
+		str, _ := reader.ReadString('\n')
+		str = strings.TrimSpace(str)
 		ch <- str
 	}()
 	return ch
@@ -57,7 +60,7 @@ func main() {
 	}
 	now := time.Now()
 	mainloop(now)
+	fmt.Print(">>")
 	info := <-waitRead()
 	save.Save(now, info)
-
 }

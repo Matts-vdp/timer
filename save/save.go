@@ -11,19 +11,30 @@ import (
 
 type saveform struct {
 	Start    time.Time
-	Duration string
+	Duration time.Duration
 	Info     string
 }
 
 func (sav saveform) String() string {
-	str := sav.Start.Format("02/01/2006 15:04")
-	str += " : " + sav.Duration
+	str := sav.Start.Format("02/01/2006")
+	str += " : " + Print(sav.Duration)
 	str += " : " + sav.Info + "\n"
 	return str
 }
 
 type saveStore struct {
 	Saves []saveform
+}
+
+func (sav *saveStore) add(sf saveform) {
+	for i := range sav.Saves {
+		if sav.Saves[i].Start.YearDay() == sf.Start.YearDay() && sav.Saves[i].Start.Year() == sf.Start.Year() {
+			sav.Saves[i].Duration += sf.Duration
+			sav.Saves[i].Info += " & " + sf.Info
+			return
+		}
+	}
+	sav.Saves = append(sav.Saves, sf)
 }
 
 func (sav saveStore) String() string {
@@ -52,9 +63,9 @@ func Load() saveStore {
 }
 
 func Save(start time.Time, info string) {
-	sf := saveform{start, Print(time.Since(start)), info}
+	sf := saveform{start, time.Since(start), info}
 	s := Load()
-	s.Saves = append(s.Saves, sf)
+	s.add(sf)
 	js, err := json.MarshalIndent(s, "", "    ")
 	if err != nil {
 		log.Fatal(err)
