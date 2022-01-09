@@ -9,6 +9,9 @@ import (
 	"time"
 )
 
+const FILE = "save.json"
+
+// used to store 1 item
 type saveform struct {
 	Start    time.Time
 	Duration time.Duration
@@ -22,10 +25,13 @@ func (sav saveform) String() string {
 	return str
 }
 
+// all saved items
 type saveStore struct {
 	Saves []saveform
 }
 
+// adds new item
+// the new duration gets added to the previous if the day is the same
 func (sav *saveStore) add(sf saveform) {
 	for i := range sav.Saves {
 		if sav.Saves[i].Start.YearDay() == sf.Start.YearDay() && sav.Saves[i].Start.Year() == sf.Start.Year() {
@@ -52,8 +58,9 @@ func Print(t time.Duration) string {
 	return fmt.Sprintf("%.2d:%.2d:%.2d", hr, mn, sc)
 }
 
+// reads the saved items from a file
 func Load() saveStore {
-	f, err := ioutil.ReadFile("C:/Users/Gebruiker/Desktop/python/Go/timer/save.json")
+	f, err := ioutil.ReadFile(FILE)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -62,6 +69,7 @@ func Load() saveStore {
 	return s
 }
 
+// saves the items to a file
 func Save(start time.Time, info string) {
 	sf := saveform{start, time.Since(start), info}
 	s := Load()
@@ -70,5 +78,5 @@ func Save(start time.Time, info string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	os.WriteFile("C:/Users/Gebruiker/Desktop/python/Go/timer/save.json", js, 0644)
+	os.WriteFile(FILE, js, 0644)
 }

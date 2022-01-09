@@ -7,11 +7,11 @@ import (
 	"os"
 	"strings"
 	"time"
-	"timer/save"
 
-	"github.com/Matts-vdp/terminal/ter"
+	"github.com/Matts-vdp/timer/save"
 )
 
+// waits until enter in input
 func waitRead() chan string {
 	ch := make(chan string)
 	go func() {
@@ -23,44 +23,49 @@ func waitRead() chan string {
 	return ch
 }
 
-func updateTime(term *ter.TerminalOut, now time.Time) {
+// updates displayed time
+func updateTime(now time.Time) {
 	pas := time.Since(now)
-	term.UpdateLine(0, now.Format("15:04:05"))
 	s := save.Print(pas)
-	term.UpdateLine(1, s)
+	fmt.Print("\r", s)
 }
 
-func GetTimes() string {
+// used to display al stored times
+func getTimes() string {
 	sav := save.Load()
 	str := sav.String()
 	return str
 }
 
+// updates screen until enter is pressed
 func mainloop(now time.Time) {
-
-	term := ter.InitTerminal(os.Stdout, make([]string, 2), true)
-	defer term.Close()
 	ch := waitRead()
 	for {
 		select {
 		case <-ch:
+			fmt.Println()
 			return
 		case <-time.After(time.Second / 5):
-			updateTime(term, now)
+			updateTime(now)
 		}
 	}
+}
+
+func askMessage(now time.Time) {
+	fmt.Print(">>")
+	info := <-waitRead()
+	save.Save(now, info)
 }
 
 func main() {
 	lg := flag.Bool("l", false, "give logging info")
 	flag.Parse()
 	if *lg {
-		fmt.Println(GetTimes())
+		fmt.Println(getTimes())
 		return
 	}
 	now := time.Now()
+	fmt.Println(now.Format("15:04:05"))
 	mainloop(now)
-	fmt.Print(">>")
-	info := <-waitRead()
-	save.Save(now, info)
+	askMessage(now)
 }
