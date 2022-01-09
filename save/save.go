@@ -62,7 +62,8 @@ func Print(t time.Duration) string {
 func Load() saveStore {
 	f, err := ioutil.ReadFile(FILE)
 	if err != nil {
-		log.Fatal(err)
+		log.Println("Creating new file")
+		return saveStore{}
 	}
 	s := saveStore{}
 	json.Unmarshal(f, &s)
